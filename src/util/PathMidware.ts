@@ -1,0 +1,25 @@
+import type { Context, Next } from 'cloudworker-router';
+import type { Env, IMidware } from '../@types/types';
+
+export class PathMidware implements IMidware {
+    private allowedPaths: string[];
+
+    public constructor(allowedPaths: string[]) {
+        this.allowedPaths = allowedPaths;
+        this.generate = this.generate.bind(this);
+    }
+
+    public async generate(ctx: Context<Env>, next: Next): Promise<Response | undefined> {
+        const { path } = ctx.params;
+
+        if (!path) {
+            return new Response('Missing path', { status: 400 });
+        }
+
+        if (!this.allowedPaths.includes(path)) {
+            return new Response('Bad path', { status: 400 });
+        }
+
+        return next();
+    }
+}

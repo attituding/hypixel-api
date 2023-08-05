@@ -1,5 +1,5 @@
 import { Router } from 'cloudworker-router';
-import type { Env } from './@types/Env';
+import type { Env } from './@types/types';
 import iris from './routes/iris';
 
 export const router = new Router<Env>();
