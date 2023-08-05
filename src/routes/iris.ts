@@ -8,7 +8,7 @@ import { PathMidware } from '../util/PathMidware';
 
 const inboundRateLimit = new RateLimiterMemory({
     points: 100,
-    duration: 1000 * 60 * 60,
+    duration: 60 * 60,
 });
 
 const outboundRateLimit = new OutboundRateLimit();

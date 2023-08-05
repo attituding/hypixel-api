@@ -22,4 +22,8 @@ export class InboundRateLimitMidware implements IMidware {
             throw error;
         }
     }
+
+    public getInboundRateLimit(): RateLimiterMemory {
+        return this.inboundRateLimit;
+    }
 }
