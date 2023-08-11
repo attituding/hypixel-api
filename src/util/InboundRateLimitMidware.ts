@@ -16,7 +16,14 @@ export class InboundRateLimitMidware implements IMidware {
             return await next();
         } catch (error) {
             if (error instanceof RateLimiterRes) {
-                return new Response(null, { status: 429 });
+                return new Response(null, {
+                    status: 429,
+                    headers: {
+                        'RateLimit-Limit': this.inboundRateLimit.points.toString(),
+                        'RateLimit-Remaining': error.remainingPoints.toString(),
+                        'RateLimit-Reset': error.msBeforeNext.toString(),
+                    },
+                });
             }
 
             throw error;

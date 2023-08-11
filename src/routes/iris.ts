@@ -13,7 +13,7 @@ const inboundRateLimit = new RateLimiterMemory({
 
 const outboundRateLimit = new OutboundRateLimit();
 
-const allowedPaths = ['player', 'recentgames', 'status'];
+const allowedPaths = ['player', 'recentGames', 'status'];
 
 const midware = [
     new InboundRateLimitMidware(inboundRateLimit).generate,

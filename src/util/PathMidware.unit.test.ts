@@ -27,7 +27,7 @@ describe('PathMidware.ts', () => {
         expect(next).toHaveBeenCalled();
     });
 
-    it('should return with status 400 with body "Missing path" if the path is missing', async () => {
+    it('should return with status 400 and statusText "Missing path" if the path is missing', async () => {
         const ctx = {
             params: {
                 path: '',
@@ -40,11 +40,10 @@ describe('PathMidware.ts', () => {
 
         expect(next).not.toHaveBeenCalled();
         expect(response.status).toBe(400);
-        const body: string = await response.text();
-        expect(body).toBe('Missing path');
+        expect(response.statusText).toBe('Missing path');
     });
 
-    it('should return with status 400 with body "Bad path" if the path is not allowed', async () => {
+    it('should return with status 400 and statusText "Bad path" if the path is not allowed', async () => {
         const ctx = {
             params: {
                 path: '/status',
@@ -57,7 +56,6 @@ describe('PathMidware.ts', () => {
 
         expect(next).not.toHaveBeenCalled();
         expect(response.status).toBe(400);
-        const body: string = await response.text();
-        expect(body).toBe('Bad path');
+        expect(response.statusText).toBe('Bad path');
     });
 });

@@ -22,17 +22,15 @@ describe('Route /iris', () => {
         expect(body.success).toBe(true);
     });
 
-    it('should return 400 when path is missing with body "Missing path"', async () => {
+    it('should return 400 when path is missing with statusText "Missing path"', async () => {
         const response = await worker.fetch('/iris?uuid=2d85909c-1bff-4a9d-885d-b5dc0b934aaf');
         expect(response.status).toBe(400);
-        const body: string = await response.text();
-        expect(body).toBe('Missing path');
+        expect(response.statusText).toBe('Missing path');
     });
 
-    it('should return 400 when path is not allowed with body "Bad path"', async () => {
+    it('should return 400 when path is not allowed with statusText "Bad path"', async () => {
         const response = await worker.fetch('/iris/foobar?uuid=2d85909c-1bff-4a9d-885d-b5dc0b934aaf');
         expect(response.status).toBe(400);
-        const body: string = await response.text();
-        expect(body).toBe('Bad path');
+        expect(response.statusText).toBe('Bad path');
     });
 });

@@ -13,11 +13,11 @@ export class PathMidware implements IMidware {
         const { path } = ctx.params;
 
         if (!path) {
-            return new Response('Missing path', { status: 400 });
+            return new Response(null, { status: 400, statusText: 'Missing path' });
         }
 
         if (!this.allowedPaths.includes(path)) {
-            return new Response('Bad path', { status: 400 });
+            return new Response(null, { status: 400, statusText: 'Bad path' });
         }
 
         return next();
