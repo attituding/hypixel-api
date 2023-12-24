@@ -5,6 +5,7 @@ import { OutboundRateLimit } from '../util/OutboundRateLimit';
 import { OutboundRateLimitMidware } from '../util/OutboundRateLimitMidware';
 import { InboundRateLimitMidware } from '../util/InboundRateLimitMidware';
 import { PathMidware } from '../util/PathMidware';
+import { CacheByMemoryMidware } from '../util/CacheByMemoryMidware';
 
 const inboundRateLimit = new RateLimiterMemory({
     points: 100,
@@ -19,6 +20,10 @@ const midware = [
     new InboundRateLimitMidware(inboundRateLimit).generate,
     new OutboundRateLimitMidware(outboundRateLimit).generate,
     new PathMidware(allowedPaths).generate,
+    new CacheByMemoryMidware<string>(15_000, (ctx) => {
+        const params = new URL(ctx.request.url).searchParams.toString();
+        return `${ctx.params.path}?${params}`;
+    }).generate,
 ];
 
 export default (router: Router<Env>) => {
@@ -34,12 +39,25 @@ export default (router: Router<Env>) => {
             },
         });
 
+        const body = await response.json();
+
+        const limit = response.headers.get('RateLimit-Limit')!;
+        const remaining = response.headers.get('RateLimit-Remaining')!;
+        const reset = response.headers.get('RateLimit-Reset')!;
+
         outboundRateLimit.update(
-            Number(response.headers.get('RateLimit-Limit')),
-            Number(response.headers.get('RateLimit-Remaining')),
-            Number(response.headers.get('RateLimit-Reset')),
+            Number(limit),
+            Number(remaining),
+            Number(reset),
         );
 
-        return response;
+        return new Response(JSON.stringify(body), {
+            headers: {
+                'Content-Type': 'application/json',
+                'RateLimit-Limit': limit,
+                'RateLimit-Remaining': remaining,
+                'RateLimit-Reset': reset,
+            },
+        });
     });
 };

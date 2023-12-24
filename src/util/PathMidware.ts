@@ -2,7 +2,7 @@ import type { Context, Next } from 'cloudworker-router';
 import type { Env, IMidware } from '../@types/types';
 
 export class PathMidware implements IMidware {
-    private allowedPaths: string[];
+    private readonly allowedPaths: string[];
 
     public constructor(allowedPaths: string[]) {
         this.allowedPaths = allowedPaths;

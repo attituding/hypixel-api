@@ -4,17 +4,20 @@ import iris from './routes/iris';
 
 export const router = new Router<Env>();
 
-iris(router);
-
 router.use(async (_, next) => {
     try {
-        return await next();
+        const response = await next();
+        response?.headers.set('Access-Control-Allow-Origin', '*');
+        response?.headers.set('Access-Control-Allow-Methods', 'GET');
+        return response;
     } catch (error) {
         return new Response(String(error), {
             status: 500,
         });
     }
 });
+
+iris(router);
 
 export default {
     fetch: async (request, env, ctx): Promise<Response> => router.handle(request, env, ctx),
