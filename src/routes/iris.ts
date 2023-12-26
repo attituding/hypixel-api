@@ -5,7 +5,7 @@ import { OutboundRateLimit } from '../util/OutboundRateLimit';
 import { OutboundRateLimitMidware } from '../util/OutboundRateLimitMidware';
 import { InboundRateLimitMidware } from '../util/InboundRateLimitMidware';
 import { PathMidware } from '../util/PathMidware';
-import { CacheByMemoryMidware } from '../util/CacheByMemoryMidware';
+import { CacheMapMidware } from '../util/CacheMapMidware';
 
 const inboundRateLimit = new RateLimiterMemory({
     points: 100,
@@ -20,10 +20,7 @@ const midware = [
     new InboundRateLimitMidware(inboundRateLimit).generate,
     new OutboundRateLimitMidware(outboundRateLimit).generate,
     new PathMidware(allowedPaths).generate,
-    new CacheByMemoryMidware<string>(15_000, (ctx) => {
-        const params = new URL(ctx.request.url).searchParams.toString();
-        return `${ctx.params.path}?${params}`;
-    }).generate,
+    new CacheMapMidware(15_000).generate,
 ];
 
 export default (router: Router<Env>) => {
@@ -31,15 +28,13 @@ export default (router: Router<Env>) => {
         const { path } = ctx.params;
         const params = new URL(ctx.request.url).searchParams.toString();
 
-        console.log(`${path}?${params}`);
+        console.log(`/iris :: ${path}?${params}`);
 
         const response = await fetch(`https://api.hypixel.net/${path}?${params}`, {
             headers: {
                 'API-Key': ctx.env.HYPIXEL_API_KEY_IRIS,
             },
         });
-
-        const body = await response.json();
 
         const limit = response.headers.get('RateLimit-Limit')!;
         const remaining = response.headers.get('RateLimit-Remaining')!;
@@ -51,9 +46,10 @@ export default (router: Router<Env>) => {
             Number(reset),
         );
 
-        return new Response(JSON.stringify(body), {
+        return new Response(response.body, {
             headers: {
-                'Content-Type': 'application/json',
+                'API-Server': response.headers.get('API-Server')!,
+                'Content-Type': response.headers.get('Content-Type')!,
                 'RateLimit-Limit': limit,
                 'RateLimit-Remaining': remaining,
                 'RateLimit-Reset': reset,

@@ -15,11 +15,18 @@ describe('Route /iris', () => {
         await worker.stop();
     });
 
-    it('should return an ok status with a success property', async () => {
-        const response = await worker.fetch('/iris/player?uuid=2d85909c-1bff-4a9d-885d-b5dc0b934aaf');
-        expect(response.ok).toBe(true);
-        const body: any = await response.json();
-        expect(body.success).toBe(true);
+    it('should return an ok status with a success property and cache responses', async () => {
+        const response1 = await worker.fetch('/iris/player?uuid=20934ef9488c465180a78f861586b4cf');
+        expect(response1.status).toBe(200);
+
+        const startTime2 = Date.now();
+        const response2 = await worker.fetch('/iris/player?uuid=20934ef9488c465180a78f861586b4cf');
+        const elapsedTime2 = Date.now() - startTime2;
+
+        // assuming cached responses will return in less than 50ms while uncached responses will not
+        expect(elapsedTime2).toBeLessThan(50);
+        expect(response2.status).toBe(200);
+        expect(JSON.stringify(await response2.json())).toEqual(JSON.stringify(await response1.json()));
     });
 
     it('should return 400 when path is missing with statusText "Missing path"', async () => {

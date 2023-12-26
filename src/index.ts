@@ -9,6 +9,8 @@ router.use(async (_, next) => {
         const response = await next();
         response?.headers.set('Access-Control-Allow-Origin', '*');
         response?.headers.set('Access-Control-Allow-Methods', 'GET');
+        response?.headers.set('Date', new Date().toUTCString());
+
         return response;
     } catch (error) {
         return new Response(String(error), {
